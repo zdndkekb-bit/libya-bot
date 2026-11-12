@@ -6,7 +6,7 @@ import time
 import os
 from collections import defaultdict
 
-# سيرفر وهمي باش Render يقعد حي - Web Service
+# سيرفر وهمي باش Render يقعد حي
 def keep_alive():
     class H(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -15,8 +15,12 @@ def keep_alive():
     HTTPServer(("0.0.0.0", int(os.environ.get("PORT", 10000))), H).serve_forever()
 threading.Thread(target=keep_alive, daemon=True).start()
 
-# حط التوكن الجديد هنا - لازم تكون درت Reset للقديم
-TOKEN = os.getenv("DISCORD_TOKEN")
+# ==============================
+# 👇👇👇 حط توكن هنا 👇👇👇
+# امسح "حط توكن هنا" والصق التوكن متاعك بين القوسين
+# مثال: TOKEN = "MTI3OT...xyz"
+TOKEN = "MTU2Njk0Nzk2ODIwMzA5NjE5NQ.GBlh0l.98XhEbRC5oJBD-sOp7stbQ-XQ0lZ1wdv0W0aUo"
+# ==============================
 
 PANEL_SUPPORT = 1570038863886286878
 STATUS_SUPPORT = 1559698854792790109
@@ -26,7 +30,6 @@ STATUS_ACTIVATION = 1559698861373522031
 PANEL_CITY = 1570245780932132874
 STATUS_CITY = 1559698715588165702
 
-# حماية - الايديهات اللي عطيتهملي
 LOG_PROTECTION = 1570390900968919050
 PANEL_PROTECTION = 1570395118228349048
 
@@ -43,7 +46,6 @@ VOICE_ACTIVATION = 1559698654200336425
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix="+", intents=intents)
 
-# ===== نظام الحماية =====
 spam_data = defaultdict(list)
 join_times = []
 raid_mode = False
@@ -60,14 +62,12 @@ async def on_message(message):
     if message.author.bot:
         return
     if protection_on:
-        # حماية روابط سيرفرات ثانية
         if "discord.gg/" in message.content or "discord.com/invite" in message.content or "discordapp.com/invite" in message.content:
             if not message.author.guild_permissions.administrator:
                 try: await message.delete()
                 except: pass
                 await send_log(f"🚨 {message.author.mention} حاول ينشر رابط سيرفر ثاني وتم حذفه")
                 return
-        # حماية سبام
         now = time.time()
         spam_data[message.author.id].append(now)
         spam_data[message.author.id] = [t for t in spam_data[message.author.id] if now - t < 5]
@@ -99,7 +99,6 @@ async def on_member_join(member):
     if age < 7:
         await send_log(f"👀 حساب جديد مشكوك فيه دخل: {member.mention} | عمر الحساب: {age} يوم")
 
-# ===== اوامر الحماية =====
 @bot.command(name="حظر")
 async def ban_cmd(ctx, member: discord.Member, *, reason="مخالفة قوانين"):
     if not ctx.author.guild_permissions.ban_members:
@@ -137,7 +136,6 @@ async def protection_status(ctx):
     embed = discord.Embed(title="🛡️ حالة الحماية", description=f"الحماية: {'🟢 شغالة' if protection_on else '🔴 طافية'}\nوضع الريد: {'🔴 شغال' if raid_mode else '🟢 طافي'}\nحماية السبام: 🟢 شغالة\nحماية الروابط: 🟢 شغالة\nحماية الحسابات الجديدة: 🟢 شغالة", color=0x00FF00)
     await ctx.send(embed=embed)
 
-# ===== لوحة الحماية الجديدة =====
 class ProtectionChooseView(discord.ui.View):
     def __init__(self): super().__init__(timeout=60)
     @discord.ui.button(label="تشغيل الحماية 🟢", style=discord.ButtonStyle.success)
@@ -190,7 +188,6 @@ async def لوحة_الحماية(ctx):
     await channel.send(embed=embed, view=ProtectionPanelView())
     await ctx.send(f"✅ تم تركيب لوحة الحماية في <#{PANEL_PROTECTION}>")
 
-# ===== كودك الاصلي للوحات =====
 async def send_status(channel_id, نوع, user, حالة):
     channel = bot.get_channel(channel_id)
     if not channel: return
@@ -339,7 +336,4 @@ async def on_ready():
     bot.add_view(CityPanelView())
     bot.add_view(ProtectionPanelView())
 
-if not TOKEN:
-    print("❌ مافيش DISCORD_TOKEN في Environment Variables")
-else:
-    bot.run(TOKEN)
+bot.run(TOKEN)
