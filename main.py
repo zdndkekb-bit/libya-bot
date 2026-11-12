@@ -1,8 +1,19 @@
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import discord
 from discord.ext import commands
 import time
 import os
 from collections import defaultdict
+
+# سيرفر وهمي باش Render يقعد حي - Web Service
+def keep_alive():
+    class H(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200); self.end_headers(); self.wfile.write(b"Bot is alive")
+        def log_message(self, *a): pass
+    HTTPServer(("0.0.0.0", int(os.environ.get("PORT", 10000))), H).serve_forever()
+threading.Thread(target=keep_alive, daemon=True).start()
 
 # حط التوكن الجديد هنا - لازم تكون درت Reset للقديم
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -328,4 +339,7 @@ async def on_ready():
     bot.add_view(CityPanelView())
     bot.add_view(ProtectionPanelView())
 
-bot.run(TOKEN)
+if not TOKEN:
+    print("❌ مافيش DISCORD_TOKEN في Environment Variables")
+else:
+    bot.run(TOKEN)
